@@ -30,6 +30,14 @@ class TestPlantillas(unittest.TestCase):
         self.assertTrue(any("color" in e for e in errores), errores)
 
 
+class TestPlantillasReales(unittest.TestCase):
+    def test_plantillas_reales_validas(self):
+        roles = [p for p in sorted((RAIZ / "plantillas").glob("*.md")) if p.name != "lineamientos.md"]
+        self.assertEqual(len(roles), 9, [p.name for p in roles])
+        for plantilla in roles:
+            self.assertEqual(validar.errores_plantilla(plantilla), [], plantilla.name)
+
+
 class TestAgentes(unittest.TestCase):
     def test_agente_con_marcador_falla(self):
         errores = validar.errores_agente(FIX / "malos" / "code-reviewer.md")
