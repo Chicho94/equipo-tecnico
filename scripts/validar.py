@@ -27,6 +27,8 @@ ROLES = {
 }
 COLORES = {"red", "blue", "green", "yellow", "purple", "orange", "pink", "cyan"}
 NO_AGENTES = {"lineamientos.md"}
+CLAVES = {"name", "description", "tools", "model", "color"}
+FIRMA = "<!-- equipo-tecnico · plantilla:"
 MARCA = re.compile(
     r"^<!-- equipo-tecnico · plantilla: (?P<rol>[a-z-]+) · fecha: \d{4}-\d{2}-\d{2}"
     r" · huella: (?P<huella>[0-9a-f]{64}|-) -->$"
@@ -74,6 +76,8 @@ def errores_plantilla(ruta: Path) -> list[str]:
         errores.append(f"color «{color}» debería ser «{esperado['color']}»")
     if not meta.get("description"):
         errores.append("falta description")
+    for clave in sorted(set(meta) - CLAVES):
+        errores.append(f"clave no permitida en el frontmatter: {clave}")
     if "## Entrega" not in cuerpo:
         errores.append("falta la sección «## Entrega»")
     if "Resumen para el humano" not in cuerpo:
@@ -113,6 +117,11 @@ def editado(ruta: Path) -> bool:
 
 def _revisar(carpeta: Path, funcion) -> int:
     archivos = [a for a in sorted(carpeta.glob("*.md")) if a.name not in NO_AGENTES]
+    if funcion is errores_agente:
+        # Los agentes propios del usuario no son del equipo: no se validan ni se tocan.
+        for ajeno in [a for a in archivos if FIRMA not in _texto(a)]:
+            print(f"{ajeno.name}: ignorado (no lo generó equipo-tecnico)")
+            archivos.remove(ajeno)
     if not archivos:
         print(f"{carpeta}: no hay archivos .md")
         return 1

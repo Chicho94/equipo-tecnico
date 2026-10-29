@@ -58,6 +58,18 @@ class TestAgentes(unittest.TestCase):
                 f.write("Línea agregada a mano.\n")
             self.assertTrue(validar.editado(copia))
 
+    def test_agentes_ignora_agentes_propios_del_usuario(self):
+        script = RAIZ / "scripts" / "validar.py"
+        r = subprocess.run([sys.executable, str(script), "agentes", str(FIX / "mixtos")],
+                           capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("mi-agente.md", r.stdout)
+        self.assertIn("ignorado", r.stdout)
+
+    def test_clave_extra_en_frontmatter_falla(self):
+        errores = validar.errores_agente(FIX / "clave_extra.md")
+        self.assertTrue(any("permissionMode" in e for e in errores), errores)
+
     def test_cli_codigo_salida(self):
         script = RAIZ / "scripts" / "validar.py"
         malos = subprocess.run([sys.executable, str(script), "agentes", str(FIX / "malos")],

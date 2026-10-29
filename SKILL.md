@@ -22,7 +22,7 @@ Lee `metodo.md` (en la carpeta de esta skill) antes de tu primera respuesta: ah�
 
 - Conversa **una pregunta a la vez**, en lenguaje simple, hasta poder resumir la idea en dos o tres frases y que el usuario lo confirme.
 - **Escenario A:** lleva con el usuario el análisis de fallos (puntos débiles, fuertes y críticos; `metodo.md` A.2–A.4) e invítalo a agregar riesgos del negocio. No propongas tecnologías todavía: eso lo hace el architect.
-- **Escenario B:** si el pedido contradice un lineamiento, nómbralo, explica por qué existía y da las opciones. Decide el usuario.
+- **Escenario B:** si el pedido contradice un lineamiento, nómbralo, explica por qué existía y da las opciones. Decide el usuario. Si las reglas están solo en `CLAUDE.md` o `AGENTS.md`, ofrécele una vez crear `LINEAMIENTOS.md` que apunte a ellas; si no quiere, no insistas.
 - **Escenario C:** propone crear los lineamientos antes de cambiar nada.
 
 ## 3. Proponer el equipo y esperar el «sí»
@@ -81,7 +81,7 @@ Los entregables de cada trabajo van en `docs/equipo/<AAAA-MM-DD-tema>/`.
 2. El usuario aprueba el stack, el diseño y los ejemplos «Cuando… si… entonces…». Lleva sus preguntas abiertas de a una.
 3. Creas `LINEAMIENTOS.md` desde `plantillas/lineamientos.md`, con lo acordado.
 4. **Segunda tanda:** generas el resto con el stack ya definido.
-5. El devops-engineer (o el desarrollador, si no hay devops) arma el esqueleto, con las pruebas, los tipos y el lint funcionando. Con esos comandos actualizas `{{COMANDOS}}` y vuelves a sellar.
+5. El devops-engineer (o el desarrollador, si no hay devops) arma el esqueleto, con las pruebas, los tipos y el lint funcionando. Con el stack y esos comandos, regenera desde la plantilla los agentes que decían «por definir», incluidos los de la primera tanda, vuelve a sellarlos y completa `LINEAMIENTOS.md` sin dejar ningún `{{…}}`.
 6. El qa-engineer trabaja en **modo rojo**: escribe las pruebas, que deben fallar.
 7. Implementan los desarrolladores. backend-dev y frontend-dev van **en paralelo** solo si sus carpetas no se tocan. Lo compartido lo hace primero un solo agente, el que asigne el architect.
 8. El qa-engineer trabaja en **modo verificación**. Si algo falla, el defecto vuelve al desarrollador indicado y se verifica de nuevo.
