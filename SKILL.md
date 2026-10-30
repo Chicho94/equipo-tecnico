@@ -20,6 +20,24 @@ Lee `metodo.md` (en la carpeta de esta skill) antes de tu primera respuesta: ah�
 
 ## 2. Entender antes de armar el equipo
 
+**Proyecto en curso (escenarios B y C): lee toda su documentación antes de proponer nada.**
+1. Documentación: `LINEAMIENTOS.md`, `CLAUDE.md`, `AGENTS.md`, README, `docs/`, notas de decisiones o seguimiento.
+2. Si no hay documentación, o no alcanza para entender el proyecto, lee el proyecto mismo:
+   - la estructura de carpetas;
+   - los archivos de dependencias (package.json, pyproject, requirements, etc.);
+   - los puntos de entrada;
+   - las pruebas existentes y cómo se corren;
+   - los últimos cambios del historial.
+3. Muéstrale al usuario **«Lo que entendí del proyecto»**, en simple y en pocas líneas:
+   - qué hace y con qué está hecho;
+   - cómo está organizado;
+   - si tiene pruebas;
+   - qué parece delicado (posibles puntos críticos);
+   - qué no pudiste deducir.
+
+   Marca como suposición todo lo que dedujiste del código y no leíste en un documento.
+4. Con eso propones el equipo (§3) **en el mismo mensaje**, explicando por qué cada rol encaja con lo que viste. Por ejemplo: frontend-dev porque hay una parte web en React; developer porque es un solo script. En el escenario C, la propuesta de crear lineamientos va dentro de ese plan (por ejemplo, el qa-engineer fija primero el comportamiento actual); no reemplaza al equipo ni lo posterga. Cierra con una sola pregunta: «¿Lo armo así?».
+
 - Conversa **una pregunta a la vez**, en lenguaje simple, hasta poder resumir la idea en dos o tres frases y que el usuario lo confirme.
 - **Escenario A:** lleva con el usuario el análisis de fallos (puntos débiles, fuertes y críticos; `metodo.md` A.2–A.4) e invítalo a agregar riesgos del negocio. No propongas tecnologías todavía: eso lo hace el architect.
 - **Escenario B:** si el pedido contradice un lineamiento, nómbralo, explica por qué existía y da las opciones. Decide el usuario. Si las reglas están solo en `CLAUDE.md` o `AGENTS.md`, ofrécele una vez crear `LINEAMIENTOS.md` que apunte a ellas; si no quiere, no insistas.

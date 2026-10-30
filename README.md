@@ -14,6 +14,15 @@ Copia `SKILL.md`, `metodo.md`, `plantillas/` y `scripts/` a `~/.claude/skills/eq
 
 En cualquier proyecto escribe `/equipo-tecnico` y cuenta lo que necesitas. También se activa sola cuando pides construir o cambiar un sistema sin entrar en lo técnico.
 
+Qué hace según el proyecto:
+- **Sistema nuevo:** conversa contigo, analiza dónde podría fallar la idea y arma el equipo en dos tandas (primero diseño, después construcción).
+- **Proyecto en curso:** lee su documentación; si no tiene, lee el proyecto mismo. Te cuenta «lo que entendió» (marcando lo que supone) y, en el mismo mensaje, te propone el equipo que encaja con lo que vio.
+- **Siempre:** te muestra el equipo y espera tu «sí» antes de crear ningún agente.
+
+## Roles posibles
+
+product-analyst · architect · qa-engineer · backend-dev · frontend-dev · developer · devops-engineer · code-reviewer · tech-writer. El director elige solo los que el trabajo necesita.
+
 ## Estructura
 
 | Ruta | Qué es |

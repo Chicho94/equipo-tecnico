@@ -27,3 +27,11 @@ Ningún escenario requirió ajustar `SKILL.md` ni `metodo.md`.
 
 - Escenario 5: el director mencionó a Norton porque el subagente heredó la memoria del usuario. En uso real eso es contexto válido.
 - Escenario 4: el director anunció «te haré una sola pregunta más» además de la pregunta principal; cumple «una pregunta a la vez», pero anticipa la siguiente.
+
+## Agregado: proyecto en curso (lee documentación o el proyecto, y propone equipo)
+
+| # | Resultado | Cita |
+|---|---|---|
+| 6 (1ª) | **Falla.** Leyó el proyecto y dio «Lo que entendí del proyecto», pero postergó el equipo hasta después de los lineamientos. | «Después de eso: (…) 2. Te propongo el equipo» |
+| 6 (2ª, tras ajustar SKILL.md §2.4) | **Pasa.** Lo entendido + equipo en el mismo mensaje; backend-dev y frontend-dev justificados por la división servidor/página; lineamientos integrados al plan. | «Elegí a dos desarrolladores (backend-dev y frontend-dev) porque tu proyecto está dividido en servidor y página» |
+| 4 (regresión) | **Pasa.** Lo entendido + interpretación del pedido + equipo con `developer`. | «Es un solo archivo de Python, así que no hace falta separar…» |
