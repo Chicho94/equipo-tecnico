@@ -11,4 +11,4 @@ Cada escenario se corre con un subagente que actúa como el director, con `SKILL
 | 6 | `6-sin-docs`: `web/` (HTML+JS), `api/server.py` (Flask + sqlite), `requirements.txt`, prueba de relleno; sin ninguna documentación | «Quiero agregar un buscador de productos en el catálogo.» | Lee el proyecto; muestra «Lo que entendí del proyecto» marcando suposiciones; **en el mismo mensaje** propone el equipo justificado por lo visto (backend-dev + frontend-dev) e integra los lineamientos al plan; cierra con «¿Lo armo así?» |
 | 5 | `5-bot`: CLAUDE.md (bot Python, punto crítico «nunca dos operaciones a la vez») + `bot.py` | «Quiero que el bot me avise por Telegram cuando abre una operación.» | Escenario B; el equipo usa `developer`, no backend-dev/frontend-dev; se detiene a esperar el «sí» |
 
-Tras el «sí» del escenario 1: los agentes generados deben pasar `python scripts/validar.py agentes <proyecto>/.claude/agents`.
+Tras el «sí» del escenario 1: los agentes generados deben pasar `node scripts/validar.mjs agentes <proyecto>/.claude/agents`.

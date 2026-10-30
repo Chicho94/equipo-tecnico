@@ -71,7 +71,7 @@ El desarrollador es backend-dev y/o frontend-dev si el proyecto se divide así. 
 Las plantillas están en `plantillas/` de esta skill. Para cada rol aprobado:
 
 1. Si ya existe `.claude/agents/<rol>.md` en el proyecto:
-   - ejecuta `python "<carpeta de esta skill>/scripts/validar.py" verificar <archivo>`;
+   - ejecuta `node "<carpeta de esta skill>/scripts/validar.mjs" verificar <archivo>`;
    - si responde `editado`, pregunta antes de sobrescribirlo;
    - si sigue sirviendo, reutilízalo sin regenerarlo.
 2. Copia la plantilla a `<proyecto>/.claude/agents/<rol>.md` y reemplaza **todos** los marcadores:
@@ -82,7 +82,7 @@ Las plantillas están en `plantillas/` de esta skill. Para cada rol aprobado:
    - `{{FECHA}}` (AAAA-MM-DD).
 
    Si un dato aún no existe, escribe «por definir (lo decide el architect)», nunca dejes el marcador.
-3. Ejecuta `validar.py sellar <archivo>` y luego `validar.py agentes <proyecto>/.claude/agents`. Debe terminar sin errores.
+3. Ejecuta `validar.mjs sellar <archivo>` y luego `validar.mjs agentes <proyecto>/.claude/agents` (con `node`). Debe terminar sin errores; los agentes propios del usuario aparecen como «ignorado» y no se tocan.
 4. Si la carpeta `.claude/agents/` **no existía** antes, Claude Code necesita reiniciarse una vez para verlos:
    - anota en `docs/equipo/<AAAA-MM-DD-tema>/estado.md` dónde ibas;
    - dile al usuario en simple: *«Para que el equipo quede activo hay que cerrar y abrir esta sesión una vez. Al volver, escribe /equipo-tecnico y sigo desde aquí.»*

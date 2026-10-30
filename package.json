@@ -1,0 +1,36 @@
+{
+  "name": "equipo-tecnico",
+  "version": "1.0.0",
+  "description": "Skill de Claude Code: un director y un equipo de agentes generados a medida para que una persona no técnica construya o cambie software.",
+  "type": "module",
+  "bin": {
+    "equipo-tecnico": "bin/cli.mjs"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "plantillas/",
+    "SKILL.md",
+    "metodo.md",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test \"tests/*.test.mjs\""
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "keywords": [
+    "claude-code",
+    "claude",
+    "skill",
+    "agents",
+    "tdd",
+    "product-owner"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chicho94/equipo-tecnico.git"
+  },
+  "license": "MIT"
+}
