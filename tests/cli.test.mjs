@@ -21,6 +21,61 @@ function conConfig(fn) {
   }
 }
 
+// Directorio personal falso: codex, gemini y kimi instalan bajo el home del usuario.
+function conHome(fn) {
+  const home = mkdtempSync(join(tmpdir(), "et-home-"));
+  const env = { ...process.env, HOME: home, USERPROFILE: home, CLAUDE_CONFIG_DIR: join(home, ".claude") };
+  delete env.GEMINI_CLI_HOME;
+  const correr = (...args) => spawnSync(process.execPath, [CLI, ...args], { encoding: "utf8", env });
+  try {
+    return fn(home, correr);
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+}
+
+test("install --para codex y --para kimi usan ~/.agents/skills", () => {
+  conHome((home, correr) => {
+    const r = correr("install", "--para", "codex");
+    assert.equal(r.status, 0, r.stdout + r.stderr);
+    assert.ok(existsSync(join(home, ".agents", "skills", "equipo-tecnico", "SKILL.md")));
+    assert.ok(existsSync(join(home, ".agents", "skills", "equipo-tecnico", "scripts", "generar.mjs")));
+    assert.ok(existsSync(join(home, ".agents", "skills", "equipo-tecnico", "scripts", "plataformas.mjs")));
+    assert.equal(correr("install", "--para", "kimi").status, 0);
+  });
+});
+
+test("install --para gemini usa ~/.gemini/skills", () => {
+  conHome((home, correr) => {
+    assert.equal(correr("install", "--para", "gemini").status, 0);
+    assert.ok(existsSync(join(home, ".gemini", "skills", "equipo-tecnico", "SKILL.md")));
+  });
+});
+
+test("install --para todas instala en las tres carpetas, y uninstall --para todas las borra", () => {
+  conHome((home, correr) => {
+    const r = correr("install", "--para", "todas");
+    assert.equal(r.status, 0, r.stdout + r.stderr);
+    const destinos = [join(home, ".claude"), join(home, ".gemini"), join(home, ".agents")].map((d) => join(d, "skills", "equipo-tecnico"));
+    for (const d of destinos) assert.ok(existsSync(join(d, "SKILL.md")), d);
+    assert.equal(correr("uninstall", "--para", "todas").status, 0);
+    for (const d of destinos) assert.ok(!existsSync(d), d);
+  });
+});
+
+test("install --para con una herramienta desconocida falla con un mensaje claro", () => {
+  conHome((_, correr) => {
+    const r = correr("install", "--para", "otra");
+    assert.equal(r.status, 1);
+    assert.ok(r.stdout.includes("codex") && r.stdout.includes("gemini") && r.stdout.includes("kimi"), r.stdout);
+  });
+});
+
+test("SKILL.md explica la herramienta, el generador, la comunicación y los modelos", () => {
+  for (const frase of ["scripts/generar.mjs", "--comunicacion", "¿Los agentes pueden consultarse entre sí?", "nunca el del director"])
+    assert.ok(SKILL.includes(frase), frase);
+});
+
 test("install copia la skill a CLAUDE_CONFIG_DIR/skills/equipo-tecnico", () => {
   conConfig((destino, correr) => {
     const r = correr("install");

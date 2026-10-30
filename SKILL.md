@@ -64,29 +64,47 @@ Tamaños orientativos:
 
 El desarrollador es backend-dev y/o frontend-dev si el proyecto se divide así. Si no (un script, un bot, una página simple), es `developer`.
 
-**No generes ni lances nada sin el «sí».** El usuario puede quitar o agregar roles.
+Bajo la tabla agrega dos puntos, que el usuario aprueba con el mismo «sí»:
+- **Modelos:** cada agente trabaja con el modelo designado para su rol, **nunca el del director**:
+  - nivel alto: architect y code-reviewer;
+  - nivel bajo: tech-writer;
+  - nivel medio: el resto.
+
+  Muestra qué modelo tendrá cada nivel en la herramienta actual (tabla en §4). En Codex no hay una escala conocida: propón modelos y pídele al usuario que los confirme. En Kimi Code no se puede elegir modelo por agente: díselo.
+- **¿Los agentes pueden consultarse entre sí?** Recomienda que sí: cualquiera puede pedirle opinión a otro rol, y cada uno sigue sin tocar el territorio ajeno. En Gemini CLI no es posible, así que avisa que esa comunicación pasa por ti. En Codex requiere `[agents] max_depth = 2` en `.codex/config.toml` del proyecto, y lo agregas tú si el usuario dice que sí.
+
+**No generes ni lances nada sin el «sí».** El usuario puede quitar o agregar roles, cambiar modelos o decir que no a la comunicación.
 
 ## 4. Generar los agentes
 
-Las plantillas están en `plantillas/` de esta skill. Para cada rol aprobado:
+Primero identifica en qué herramienta estás trabajando. De eso depende el valor de `--para`, la carpeta de los agentes y los modelos por defecto:
 
-1. Si ya existe `.claude/agents/<rol>.md` en el proyecto:
-   - ejecuta `node "<carpeta de esta skill>/scripts/validar.mjs" verificar <archivo>`;
-   - si responde `editado`, pregunta antes de sobrescribirlo;
-   - si sigue sirviendo, reutilízalo sin regenerarlo.
-2. Copia la plantilla a `<proyecto>/.claude/agents/<rol>.md` y reemplaza **todos** los marcadores:
-   - `{{PROYECTO}}`, `{{STACK}}`, `{{CARPETAS}}`, `{{CARPETAS_PROHIBIDAS}}`;
-   - `{{COMANDOS}}` (cómo correr pruebas, tipos y lint);
-   - `{{LINEAMIENTOS}}` (ruta);
-   - `{{PUNTOS_CRITICOS}}` (lista breve);
-   - `{{FECHA}}` (AAAA-MM-DD).
+| Herramienta | `--para` | Carpeta de agentes | Modelos alto / medio / bajo |
+|---|---|---|---|
+| Claude Code | `claude` | `.claude/agents/` | opus / sonnet / haiku |
+| Codex | `codex` | `.codex/agents/` (archivos `.toml`) | los elige el usuario |
+| Gemini CLI | `gemini` | `.gemini/agents/` | pro / flash / flash-lite |
+| Kimi Code | `kimi` | `.kimi-code/agents/` | no se puede elegir por agente |
 
-   Si un dato aún no existe, escribe «por definir (lo decide el architect)», nunca dejes el marcador.
-3. Ejecuta `validar.mjs sellar <archivo>` y luego `validar.mjs agentes <proyecto>/.claude/agents` (con `node`). Debe terminar sin errores; los agentes propios del usuario aparecen como «ignorado» y no se tocan.
-4. Si la carpeta `.claude/agents/` **no existía** antes, Claude Code necesita reiniciarse una vez para verlos:
+1. Escribe los datos del proyecto en `docs/equipo/<AAAA-MM-DD-tema>/datos.json`:
+   - `PROYECTO`, `STACK`, `CARPETAS`, `CARPETAS_PROHIBIDAS`;
+   - `COMANDOS` (cómo correr pruebas, tipos y lint);
+   - `LINEAMIENTOS` (ruta);
+   - `PUNTOS_CRITICOS` (lista breve);
+   - `FECHA` (AAAA-MM-DD);
+   - y, si el usuario cambió algún modelo (en Codex, siempre), `"modelos": {"<herramienta>": {"alto": …, "medio": …, "bajo": …}}`.
+
+   Si un dato aún no existe, escribe «por definir (lo decide el architect)».
+2. Para cada rol aprobado:
+   - si el agente ya existe, ejecuta `node "<carpeta de esta skill>/scripts/validar.mjs" verificar <archivo>`. Si responde `editado`, pregunta antes de sobrescribirlo; si sigue sirviendo, reutilízalo;
+   - si no, genéralo con `node "<carpeta de esta skill>/scripts/generar.mjs" <rol> --para <herramienta> --datos <datos.json> --proyecto . --comunicacion si|no`. El script escribe el agente en el formato y la carpeta correctos y lo sella. Las «Nota:» que imprime son para el usuario: cuéntaselas en simple.
+3. Ejecuta `node "<carpeta de esta skill>/scripts/validar.mjs" agentes <carpeta de agentes>`. Debe terminar sin errores; los agentes propios del usuario aparecen como «ignorado» y no se tocan.
+4. Si la carpeta de agentes **no existía** antes, la herramienta puede necesitar reiniciarse una vez para verlos:
    - anota en `docs/equipo/<AAAA-MM-DD-tema>/estado.md` dónde ibas;
-   - dile al usuario en simple: *«Para que el equipo quede activo hay que cerrar y abrir esta sesión una vez. Al volver, escribe /equipo-tecnico y sigo desde aquí.»*
-   - Al volver, lee `estado.md` y retoma.
+   - dile al usuario en simple: *«Para que el equipo quede activo hay que cerrar y abrir esta sesión una vez. Al volver, pídeme seguir con equipo-tecnico y retomo desde aquí.»*;
+   - al volver, lee `estado.md` y retoma.
+
+Para lanzar a un agente, pídelo por su nombre de rol con la forma de delegar de tu herramienta. En Codex, los subagentes solo se lanzan si se piden de forma explícita.
 
 Los agentes quedan en el proyecto. En cada trabajo lanzas **solo** a los del equipo aprobado.
 
@@ -99,7 +117,7 @@ Los entregables de cada trabajo van en `docs/equipo/<AAAA-MM-DD-tema>/`.
 2. El usuario aprueba el stack, el diseño y los ejemplos «Cuando… si… entonces…». Lleva sus preguntas abiertas de a una.
 3. Creas `LINEAMIENTOS.md` desde `plantillas/lineamientos.md`, con lo acordado.
 4. **Segunda tanda:** generas el resto con el stack ya definido.
-5. El devops-engineer (o el desarrollador, si no hay devops) arma el esqueleto, con las pruebas, los tipos y el lint funcionando. Con el stack y esos comandos, regenera desde la plantilla los agentes que decían «por definir», incluidos los de la primera tanda, vuelve a sellarlos y completa `LINEAMIENTOS.md` sin dejar ningún `{{…}}`.
+5. El devops-engineer (o el desarrollador, si no hay devops) arma el esqueleto, con las pruebas, los tipos y el lint funcionando. Con el stack y esos comandos, actualiza `datos.json` y vuelve a ejecutar `generar.mjs` para los agentes que decían «por definir», incluidos los de la primera tanda. Completa también `LINEAMIENTOS.md`, sin dejar ningún `{{…}}`.
 6. El qa-engineer trabaja en **modo rojo**: escribe las pruebas, que deben fallar.
 7. Implementan los desarrolladores. backend-dev y frontend-dev van **en paralelo** solo si sus carpetas no se tocan. Lo compartido lo hace primero un solo agente, el que asigne el architect.
 8. El qa-engineer trabaja en **modo verificación**. Si algo falla, el defecto vuelve al desarrollador indicado y se verifica de nuevo.

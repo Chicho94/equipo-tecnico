@@ -1,23 +1,31 @@
 #!/usr/bin/env node
-// npx equipo-tecnico install | uninstall
+// npx equipo-tecnico install|uninstall [--para claude|codex|gemini|kimi|todas]
 import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs";
-import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { PLATAFORMAS } from "../scripts/plataformas.mjs";
 import { revisar } from "../scripts/validar.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENIDO = ["SKILL.md", "metodo.md", "plantillas", "scripts"];
-const configClaude = process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude");
-const DESTINO = join(configClaude, "skills", "equipo-tecnico");
+const NOMBRES = Object.keys(PLATAFORMAS);
 
-const AYUDA = `equipo-tecnico: skill de Claude Code para que una persona no técnica dirija un equipo de agentes.
+const AYUDA = `equipo-tecnico: skill para que una persona no técnica dirija un equipo de agentes de IA.
 
-  npx equipo-tecnico install     instala o actualiza la skill en ${DESTINO}
-  npx equipo-tecnico uninstall   la desinstala
+  npx equipo-tecnico install                  instala o actualiza la skill para Claude Code
+  npx equipo-tecnico install --para codex     … para Codex       (también: gemini, kimi, todas)
+  npx equipo-tecnico uninstall [--para …]     la desinstala
 `;
 
-function instalar() {
+// Carpetas de skills de cada herramienta; Codex y Kimi comparten ~/.agents/skills, así que se instala una sola vez.
+function destinos(para) {
+  const elegidas = para === "todas" ? NOMBRES : [para];
+  return [...new Map(elegidas.map((p) => [PLATAFORMAS[p].skills(), PLATAFORMAS[p].nombre])).entries()].map(
+    ([carpeta, nombre]) => ({ destino: join(carpeta, "equipo-tecnico"), nombre }),
+  );
+}
+
+function instalar(para) {
   // Validar antes de borrar: si las plantillas vinieran mal, la instalación anterior queda intacta.
   const previa = revisar(join(RAIZ, "plantillas"), "plantillas");
   if (previa.codigo !== 0) {
@@ -25,26 +33,37 @@ function instalar() {
     console.error("No se instaló: el paquete trae plantillas inválidas.");
     return 1;
   }
-  rmSync(DESTINO, { recursive: true, force: true });
-  mkdirSync(DESTINO, { recursive: true });
-  for (const parte of CONTENIDO) cpSync(join(RAIZ, parte), join(DESTINO, parte), { recursive: true });
-  console.log(`Listo. Skill instalada en ${DESTINO}`);
-  console.log("Abre una sesión nueva de Claude Code y escribe /equipo-tecnico para empezar.");
-  return 0;
-}
-
-function desinstalar() {
-  if (!existsSync(DESTINO)) {
-    console.log("La skill no estaba instalada.");
-    return 0;
+  for (const { destino, nombre } of destinos(para)) {
+    rmSync(destino, { recursive: true, force: true });
+    mkdirSync(destino, { recursive: true });
+    for (const parte of CONTENIDO) cpSync(join(RAIZ, parte), join(destino, parte), { recursive: true });
+    console.log(`Listo para ${nombre}: ${destino}`);
   }
-  rmSync(DESTINO, { recursive: true, force: true });
-  console.log(`Skill desinstalada de ${DESTINO}`);
+  console.log("Abre una sesión nueva de tu herramienta y pide usar la skill equipo-tecnico (en Claude Code: /equipo-tecnico).");
   return 0;
 }
 
-const comando = process.argv[2];
-if (comando === "install") process.exit(instalar());
-if (comando === "uninstall") process.exit(desinstalar());
+function desinstalar(para) {
+  for (const { destino, nombre } of destinos(para)) {
+    if (!existsSync(destino)) {
+      console.log(`No estaba instalada para ${nombre}.`);
+      continue;
+    }
+    rmSync(destino, { recursive: true, force: true });
+    console.log(`Desinstalada de ${nombre}: ${destino}`);
+  }
+  return 0;
+}
+
+const [comando, ...resto] = process.argv.slice(2);
+const i = resto.indexOf("--para");
+const para = i === -1 ? "claude" : resto[i + 1];
+if ((comando === "install" || comando === "uninstall") && para !== "todas" && !NOMBRES.includes(para)) {
+  console.log(`Herramienta desconocida: «${para}». Usa una de: ${[...NOMBRES, "todas"].join(", ")}.\n`);
+  console.log(AYUDA);
+  process.exit(1);
+}
+if (comando === "install") process.exit(instalar(para));
+if (comando === "uninstall") process.exit(desinstalar(para));
 console.log(AYUDA);
 process.exit(comando === "help" || comando === "--help" ? 0 : 1);
