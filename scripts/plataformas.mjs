@@ -42,6 +42,7 @@ export const PLATAFORMAS = {
     herramientas: (tools) => tools,
     claves: ["name", "description", "tools", "model", "color"],
     comunicacion: "Agent",
+    instalada: () => config("CLAUDE_CONFIG_DIR", ".claude"),
     skills: () => join(config("CLAUDE_CONFIG_DIR", ".claude"), "skills"),
   },
   gemini: {
@@ -53,6 +54,7 @@ export const PLATAFORMAS = {
     lista: true,
     claves: ["name", "description", "tools", "model"],
     comunicacion: null,
+    instalada: () => config("GEMINI_CLI_HOME", ".gemini"),
     skills: () => join(config("GEMINI_CLI_HOME", ".gemini"), "skills"),
   },
   kimi: {
@@ -64,6 +66,7 @@ export const PLATAFORMAS = {
     lista: true,
     claves: ["name", "description", "tools"],
     comunicacion: "Agent",
+    instalada: () => config("KIMI_CODE_HOME", ".kimi-code"),
     skills: () => join(homedir(), ".agents", "skills"),
   },
   codex: {
@@ -73,6 +76,7 @@ export const PLATAFORMAS = {
     modelos: "requeridos", // Codex no trae una escala conocida: el usuario elige el modelo de cada nivel.
     esfuerzo: { alto: "high", medio: "medium", bajo: "low" },
     comunicacion: "max_depth",
+    instalada: () => config("CODEX_HOME", ".codex"),
     skills: () => join(homedir(), ".agents", "skills"),
   },
 };

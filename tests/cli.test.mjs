@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,22 +10,31 @@ const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CLI = join(RAIZ, "bin", "cli.mjs");
 const SKILL = readFileSync(join(RAIZ, "SKILL.md"), "utf8");
 
+// Entorno sin las variables reales de las herramientas, para no tocar las carpetas del usuario.
+function entornoAislado(home, extra = {}) {
+  const env = { ...process.env, HOME: home, USERPROFILE: home, ...extra };
+  for (const v of ["GEMINI_CLI_HOME", "CODEX_HOME", "KIMI_CODE_HOME"]) delete env[v];
+  if (!("CLAUDE_CONFIG_DIR" in extra)) env.CLAUDE_CONFIG_DIR = join(home, ".claude");
+  return env;
+}
+
 function conConfig(fn) {
   const config = mkdtempSync(join(tmpdir(), "et-config-"));
-  const correr = (...args) =>
-    spawnSync(process.execPath, [CLI, ...args], { encoding: "utf8", env: { ...process.env, CLAUDE_CONFIG_DIR: config } });
+  const home = mkdtempSync(join(tmpdir(), "et-home-"));
+  const env = entornoAislado(home, { CLAUDE_CONFIG_DIR: config });
+  const correr = (...args) => spawnSync(process.execPath, [CLI, ...args], { encoding: "utf8", env });
   try {
     return fn(join(config, "skills", "equipo-tecnico"), correr);
   } finally {
     rmSync(config, { recursive: true, force: true });
+    rmSync(home, { recursive: true, force: true });
   }
 }
 
 // Directorio personal falso: codex, gemini y kimi instalan bajo el home del usuario.
 function conHome(fn) {
   const home = mkdtempSync(join(tmpdir(), "et-home-"));
-  const env = { ...process.env, HOME: home, USERPROFILE: home, CLAUDE_CONFIG_DIR: join(home, ".claude") };
-  delete env.GEMINI_CLI_HOME;
+  const env = entornoAislado(home);
   const correr = (...args) => spawnSync(process.execPath, [CLI, ...args], { encoding: "utf8", env });
   try {
     return fn(home, correr);
@@ -33,6 +42,34 @@ function conHome(fn) {
     rmSync(home, { recursive: true, force: true });
   }
 }
+
+test("install sin --para instala solo en las herramientas que encuentra", () => {
+  conHome((home, correr) => {
+    mkdirSync(join(home, ".codex"));
+    mkdirSync(join(home, ".gemini"));
+    const r = correr("install");
+    assert.equal(r.status, 0, r.stdout + r.stderr);
+    assert.ok(existsSync(join(home, ".agents", "skills", "equipo-tecnico", "SKILL.md")), r.stdout);
+    assert.ok(existsSync(join(home, ".gemini", "skills", "equipo-tecnico", "SKILL.md")), r.stdout);
+    assert.ok(!existsSync(join(home, ".claude", "skills", "equipo-tecnico")), r.stdout);
+  });
+});
+
+test("install sin --para y sin ninguna herramienta instala para todas", () => {
+  conHome((home, correr) => {
+    const r = correr("install");
+    assert.equal(r.status, 0, r.stdout + r.stderr);
+    for (const d of [".claude", ".gemini", ".agents"]) assert.ok(existsSync(join(home, d, "skills", "equipo-tecnico", "SKILL.md")), d);
+  });
+});
+
+test("uninstall sin --para la quita de todas partes", () => {
+  conHome((home, correr) => {
+    correr("install", "--para", "todas");
+    assert.equal(correr("uninstall").status, 0);
+    for (const d of [".claude", ".gemini", ".agents"]) assert.ok(!existsSync(join(home, d, "skills", "equipo-tecnico")), d);
+  });
+});
 
 test("install --para codex y --para kimi usan ~/.agents/skills", () => {
   conHome((home, correr) => {

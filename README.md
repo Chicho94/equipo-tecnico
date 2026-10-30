@@ -10,23 +10,20 @@ Solo necesitas [Node.js](https://nodejs.org) 18 o superior.
 npx equipo-tecnico install
 ```
 
-Copia la skill a `~/.claude/skills/equipo-tecnico/`, o a `$CLAUDE_CONFIG_DIR/skills/` si usas esa variable. Si ya estaba instalada, la reemplaza por la versión nueva. Después, abre una sesión nueva de Claude Code.
+Detecta qué herramientas tienes (Claude Code, Codex, Gemini CLI, Kimi Code) e instala la skill en todas ellas. Si no encuentra ninguna, la instala para las cuatro. Después, abre una sesión nueva de tu herramienta.
 
-Para desinstalarla:
+Para desinstalarla de todas partes:
 
 ```
 npx equipo-tecnico uninstall
 ```
 
-### Otras herramientas
+### Una sola herramienta y diferencias entre ellas
 
-La skill también funciona con **Codex**, **Gemini CLI** y **Kimi Code**:
+Si quieres instalarla solo en una herramienta:
 
 ```
-npx equipo-tecnico install --para codex
-npx equipo-tecnico install --para gemini
-npx equipo-tecnico install --para kimi
-npx equipo-tecnico install --para todas
+npx equipo-tecnico install --para claude    (o codex, gemini, kimi, todas)
 ```
 
 | | Claude Code | Codex | Gemini CLI | Kimi Code |

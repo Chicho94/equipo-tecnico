@@ -12,14 +12,21 @@ const NOMBRES = Object.keys(PLATAFORMAS);
 
 const AYUDA = `equipo-tecnico: skill para que una persona no técnica dirija un equipo de agentes de IA.
 
-  npx equipo-tecnico install                  instala o actualiza la skill para Claude Code
-  npx equipo-tecnico install --para codex     … para Codex       (también: gemini, kimi, todas)
-  npx equipo-tecnico uninstall [--para …]     la desinstala
+  npx equipo-tecnico install                  instala o actualiza la skill en todas las herramientas que encuentre
+                                              (Claude Code, Codex, Gemini CLI, Kimi Code)
+  npx equipo-tecnico install --para codex     solo para una (claude, codex, gemini, kimi o todas)
+  npx equipo-tecnico uninstall [--para …]     la desinstala (sin --para, de todas)
 `;
 
 // Carpetas de skills de cada herramienta; Codex y Kimi comparten ~/.agents/skills, así que se instala una sola vez.
+// Sin --para: las herramientas que estén instaladas en este computador; si no hay ninguna, todas.
+function detectadas() {
+  const encontradas = NOMBRES.filter((p) => existsSync(PLATAFORMAS[p].instalada()));
+  return encontradas.length ? encontradas : NOMBRES;
+}
+
 function destinos(para) {
-  const elegidas = para === "todas" ? NOMBRES : [para];
+  const elegidas = para === "auto" ? detectadas() : para === "todas" ? NOMBRES : [para];
   return [...new Map(elegidas.map((p) => [PLATAFORMAS[p].skills(), PLATAFORMAS[p].nombre])).entries()].map(
     ([carpeta, nombre]) => ({ destino: join(carpeta, "equipo-tecnico"), nombre }),
   );
@@ -57,8 +64,8 @@ function desinstalar(para) {
 
 const [comando, ...resto] = process.argv.slice(2);
 const i = resto.indexOf("--para");
-const para = i === -1 ? "claude" : resto[i + 1];
-if ((comando === "install" || comando === "uninstall") && para !== "todas" && !NOMBRES.includes(para)) {
+const para = i !== -1 ? resto[i + 1] : comando === "uninstall" ? "todas" : "auto";
+if ((comando === "install" || comando === "uninstall") && !["auto", "todas", ...NOMBRES].includes(para)) {
   console.log(`Herramienta desconocida: «${para}». Usa una de: ${[...NOMBRES, "todas"].join(", ")}.\n`);
   console.log(AYUDA);
   process.exit(1);
